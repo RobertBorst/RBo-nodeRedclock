@@ -1,0 +1,118 @@
+[
+    {
+        "id": "5368c3fd.d6e914",
+        "type": "tab",
+        "label": "Rbo - Clock flow 1.0"
+    },
+    {
+        "id": "ae585415.cb5088",
+        "type": "rpi-sensehat out",
+        "z": "5368c3fd.d6e914",
+        "name": "",
+        "x": 654.6666870117188,
+        "y": 527.6666870117188,
+        "wires": []
+    },
+    {
+        "id": "3b6233cb.ad080c",
+        "type": "comment",
+        "z": "5368c3fd.d6e914",
+        "name": "Simple clock on Sense Hat",
+        "info": "Simple clock on sense hat of raspberry pi\nHours are red.\nminute \"tens\" are cyan\nminute \"singles\" are green\nSeconds run every second to another corner in blue\n\nUses the local time of the Pi - you may need to set your local\ntimezone using\n\n    sudo dpkg-reconfigure tzdata\n    \n    RBo\n",
+        "x": 284.666748046875,
+        "y": 357.6666564941406,
+        "wires": []
+    },
+    {
+        "id": "b420fbbc.8b001",
+        "type": "inject",
+        "z": "5368c3fd.d6e914",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "x": 114.66665649414062,
+        "y": 467.6666259765625,
+        "wires": [
+            [
+                "7f3127d0.7855f8"
+            ]
+        ]
+    },
+    {
+        "id": "613cb7b1.ee2818",
+        "type": "inject",
+        "z": "5368c3fd.d6e914",
+        "name": "Low Light",
+        "topic": "",
+        "payload": "D0",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 103.66668701171875,
+        "y": 542.6666259765625,
+        "wires": [
+            [
+                "ae585415.cb5088"
+            ]
+        ]
+    },
+    {
+        "id": "8d6453a9.8e0ba",
+        "type": "inject",
+        "z": "5368c3fd.d6e914",
+        "name": "Intense Light",
+        "topic": "",
+        "payload": "D1",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 118.66665649414062,
+        "y": 590.3332824707031,
+        "wires": [
+            [
+                "ae585415.cb5088"
+            ]
+        ]
+    },
+    {
+        "id": "56e3699.9090e98",
+        "type": "inject",
+        "z": "5368c3fd.d6e914",
+        "name": "Clear all",
+        "topic": "",
+        "payload": "0-7,0-7,off",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 110,
+        "y": 634.3331909179688,
+        "wires": [
+            [
+                "ae585415.cb5088"
+            ]
+        ]
+    },
+    {
+        "id": "7f3127d0.7855f8",
+        "type": "function",
+        "z": "5368c3fd.d6e914",
+        "name": "Node-red Sensor hat clock",
+        "func": "\nvar d = new Date();\nvar s =  d.getSeconds();\nvar su=s%4;\n// seconds jumper comes from the sense-hat example for a clock\nnode.send({payload:\"0,0,\"+(su===0?\"blue\":\"off\")+\",7,0,\"+(su===1?\"blue\":\"off\")+\",7,7,\"+(su===2?\"blue\":\"off\")+\",0,7,\"+(su===3?\"blue\":\"off\")});\n\nvar hr=d.getHours();\nvar hr10s=[ \"6-4,6,off\",\n            \"6-4,6,off,5,6,red\",\n            \"6-4,6,off,6,6,red,4,6,red\"];\nnode.send({payload:hr10s[(Math.floor(hr/10))]})          \n\nfunction maak9(beginX, eindX,beginY,eindY,kleur,nummer){\n// validatie nodig\n// randvoorwaarden definiëren\n// orientatie inbouwen\n// cijfers maken\nvar maakleeg=beginX.toString()+\"-\"+eindX.toString()+\",\"+beginY.toString()+\"-\"+eindY.toString()+\",off\";\nvar maakvol=beginX.toString()+\"-\"+eindX.toString()+\",\"+beginY.toString()+\"-\"+eindY.toString()+\",\"+kleur;\n    if (nummer===0) {\n        return maakleeg;\n    }\t\n\tif (nummer===9) {\n\t\treturn maakvol;\n\t}\n\tif (nummer===8) {\n\t    middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2;\n\t\treturn maakvol+\",\"+middenX.toString()+\",\"+middenY.toString()+\",off\";\n\t\t}\n\tif (nummer===1){\n\t    middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2;\n\t\treturn maakleeg+\",\"+middenX.toString()+\",\"+middenY.toString()+\",\"+kleur;\n\t}\n\tif (nummer===7) {\n\t    //middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // horizontal mode\n\t\treturn maakvol+\",\"+beginX.toString()+\",\"+middenY.toString()+\",off,\"+eindX.toString()+\",\"+middenY.toString()+\",off\";\n\t\t}\n\tif (nummer===2) {\n\t    //middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // horizontal mode\n\t\treturn maakleeg+\",\"+beginX.toString()+\",\"+middenY.toString()+\",\"+kleur+\",\"+eindX.toString()+\",\"+middenY.toString()+\",\"+kleur;\n\t\t}\t\n\tif (nummer===6) {\n\t    //middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // horizontal mode\n\t\treturn maakvol+\",\"+beginX.toString()+\"-\"+eindX.toString()+\",\"+middenY.toString()+\",off\";\n\t\t}\n\tif (nummer===3) {\n\t    //middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // horizontal mode\n\t\treturn maakleeg+\",\"+beginX.toString()+\"-\"+eindX.toString()+\",\"+middenY.toString()+\",\"+kleur;\n\t\t}\n\tif (nummer===5) {\n\t    middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // maak plus teken\n\t\treturn maakvol+\",\"+beginX.toString()+\",\"+beginY.toString()+\",off,\"+beginX.toString()+\",\"+eindY.toString()+\",off,\"+eindX.toString()+\",\"+beginY.toString()+\",off,\"+eindX.toString()+\",\"+eindY.toString()+\",off\"\n\t\t}\n\tif (nummer===4) {\n\t    middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // maak plus teken\n\t\treturn maakleeg+\",\"+beginX.toString()+\",\"+beginY.toString()+\",\"+kleur+\",\"+beginX.toString()+\",\"+eindY.toString()+\",\"+kleur+\",\"+eindX.toString()+\",\"+beginY.toString()+\",\"+kleur+\",\"+eindX.toString()+\",\"+eindY.toString()+\",\"+kleur\n\t\t}\n}\n\nfunction uren9(uur)\n{\nnode.send({payload:maak9(6,4,4,2,\"red\",uur%10)});\n}\n\nuren9(hr); // kleur de eenheden van de uren in.\n\nfunction minuten9(minuten)\n{\nnode.send({payload:maak9(3,1,4,2,\"green\",minuten%10)});\n}\n\nfunction maak6(beginX, eindX,beginY,eindY,kleur,nummer)\n{ // functie voor de tientallen van de minuten\n var maakleeg=beginX.toString()+\"-\"+eindX.toString()+\",\"+beginY.toString()+\"-\"+eindY.toString()+\",off\";\nvar maakvol=beginX.toString()+\"-\"+eindX.toString()+\",\"+beginY.toString()+\"-\"+eindY.toString()+\",\"+kleur;\n    if (nummer===0) {\n        return maakleeg;\n    }\t\n\tif (nummer===1){\n\t    middenX=(beginX+eindX)/2;\n\t\t//middenY=(beginY+eindY)/2;\n\t\treturn maakleeg+\",\"+middenX.toString()+\",\"+beginY.toString()+\",\"+kleur;\n\t}\n\tif (nummer===2) {\n\t    //middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // horizontal mode\n\t\treturn maakleeg+\",\"+beginX.toString()+\",\"+beginY.toString()+\",\"+kleur+\",\"+eindX.toString()+\",\"+beginY.toString()+\",\"+kleur;\n\t\t}\t\n\tif (nummer===3) {\n\t    //middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // horizontal mode\n\t\treturn maakleeg+\",\"+beginX.toString()+\"-\"+eindX.toString()+\",\"+beginY.toString()+\",\"+kleur;\n\t\t}\n\tif (nummer===5) {\n\t    middenX=(beginX+eindX)/2;\n\t\tmiddenY=(beginY+eindY)/2; // maak plus teken\n\t\treturn maakvol+\",\"+middenX.toString()+\",\"+eindY.toString()+\",off\"\n\t\t}\n\tif (nummer===4) {\n\t    middenX=(beginX+eindX)/2;\n\t\t//middenY=(beginY+eindY)/2; // maak plus teken\n\t\treturn maakvol+\",\"+middenX.toString()+\",\"+beginY.toString()+\"-\"+eindY.toString()+\",off\"\n\t\t}\n}\n\nvar minuten=d.getMinutes();\nminuten9(minuten); // kleur de minuten in\n\nfunction minuten6(minuten)\n{\nnode.send({payload:maak6(3,1,6,5,\"cyan\",(Math.floor(minuten/10)))});\n}\nminuten6(minuten)\n//var min=d.getMinutes();\n//var mn10s=[\"3-1,6,off\"]\n\nmsg=null;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 369.3333740234375,
+        "y": 469.99993896484375,
+        "wires": [
+            [
+                "ae585415.cb5088"
+            ]
+        ]
+    }
+]
